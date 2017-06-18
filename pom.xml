@@ -34,6 +34,11 @@
   </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- These properties will be set by the Maven Dependency plugin -->
+    <!-- Change to jdk7 if using Java 7 -->
+    <annotatedJdk>${org.checkerframework:jdk8:jar}</annotatedJdk>
+    <!-- Uncomment to use the type annotations compiler. -->
+    <!-- <typeAnnotationsJavac>${org.checkerframework:compiler:jar}</typeAnnotationsJavac> -->
   </properties>
   <build>
     <plugins>
@@ -75,6 +80,7 @@
           </execution>
         </executions>
       </plugin>
+      <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -84,6 +90,31 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+      -->
+    <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.1</version>
+        <configuration>
+            <compilerArguments>
+              <Xmaxerrs>1000</Xmaxerrs>
+            </compilerArguments>
+            <!-- Change source and target to 1.7 if using Java 7 -->
+            <source>1.8</source>
+            <target>1.8</target>
+            <fork>true</fork>
+            <annotationProcessors>
+                <!-- Add all the checkers you want to enable here -->
+                <!-- <annotationProcessor>org.checkerframework.checker.nullness.NullnessChecker</annotationProcessor> -->
+                <annotationProcessor>org.checkerframework.checker.optional.OptionalChecker</annotationProcessor>
+            </annotationProcessors>
+            <compilerArgs>
+                <!-- location of the annotated JDK, which comes from a Maven dependency -->
+                <arg>-Xbootclasspath/p:${annotatedJdk}</arg>
+                <!-- Uncomment the following line to use the type annotations compiler. -->
+                <!-- <arg>-J-Xbootclasspath/p:${typeAnnotationsJavac}</arg> -->
+            </compilerArgs>
+        </configuration>
+    </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -116,6 +147,18 @@
           <linkXRef>false</linkXRef>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
         </configuration>
+      </plugin>
+      <plugin>
+          <!-- This plugin will set properties values using dependency information -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>properties</goal>
+                  </goals>
+              </execution>
+          </executions>
       </plugin>
     </plugins>
   </build>
@@ -161,5 +204,36 @@
       <version>1.11</version>
       <scope>test</scope>
     </dependency>
+        <!-- annotations from the Checker Framework: nullness, interning, locking, ... -->
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-qual</artifactId>
+            <version>2.1.12</version>
+            <scope>system</scope>
+            <systemPath>${env.CHECKERFRAMEWORK}/checker/dist/checker-qual.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker</artifactId>
+            <version>2.1.12</version>
+            <scope>system</scope>
+            <systemPath>${env.CHECKERFRAMEWORK}/checker/dist/checker.jar</systemPath>
+        </dependency>
+        <!-- The Type Annotations compiler. Uncomment if using Java 7 or annotations in comments. -->
+        <!-- <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>compiler</artifactId>
+            <version>2.1.12</version>
+            <scope>system</scope>
+            <systemPath>${env.CHECKERFRAMEWORK}/checker/dist/compiler.jar</systemPath>
+        </dependency> -->
+        <!-- The annotated JDK to use (change to jdk7 if using Java 7). -->
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>jdk8</artifactId>
+            <version>2.1.12</version>
+            <scope>system</scope>
+            <systemPath>${env.CHECKERFRAMEWORK}/checker/dist/jdk8.jar</systemPath>
+        </dependency>
   </dependencies>
 </project>
